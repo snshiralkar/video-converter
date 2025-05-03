@@ -3,11 +3,21 @@ import axios from "axios";
 
 const App = () => {
   const [file, setFile] = useState(null);
+  const [progress, setProgress] = useState(0);
   const onSubmit = async (e) => {
     e.preventDefault();
     let formData = new FormData(e.target);
     setFile(formData.get("video"));
-    const response = await axios.post("http://localhost:3001/convert");
+    const response = await axios.post(
+      "http://localhost:3001/convert",
+      formData,
+      {
+        onUploadProgress: (e) => {
+          const p = (e.loaded * 100) / e.total;
+          setProgress(p);
+        },
+      }
+    );
     console.log(response.data);
   };
   return (
@@ -28,9 +38,9 @@ const App = () => {
               name="format"
               className="bg-blue-500 p-3 rounded text-white text-md"
             >
-              <option value="mp3">.mp3</option>
-              <option value="mp4">.mp4</option>
-              <option value="3gp">.3gp</option>
+              <option value=".mp3">.mp3</option>
+              <option value=".mp4">.mp4</option>
+              <option value=".3gp">.3gp</option>
             </select>
           </div>
           <button className="bg-blue-500 text-white  w-fit py-2 px-5 text-lg font-semibold rounded">
@@ -46,9 +56,14 @@ const App = () => {
               </label>
             </div>
             <div className="bg-gray-200 h-8">
-              <div className="bg-green-500 w-6/12 h-full"></div>
+              <div
+                className="bg-green-500  h-full"
+                style={{
+                  width: progress + "%",
+                }}
+              ></div>
               <label className="text-zinc-600 font-semibold">
-                Progress - 60%
+                Progress - {Math.floor(progress) + "%"}
               </label>
             </div>
           </>
